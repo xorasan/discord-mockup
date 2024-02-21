@@ -1,0 +1,5 @@
+{
+	"name": "discord-mockup",
+	"main": "pub/index.html",
+	"chromium-args": "--disable-features=ProcessPerSiteUpToMainFrameThreshold"
+}
