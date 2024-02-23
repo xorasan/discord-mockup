@@ -5,6 +5,10 @@ src
 	reset
 	menu
 	webapp
+	files
+	cli
+	weld
+	offline
 	softkeys
 	themes
 	sheet
@@ -46,6 +50,11 @@ icons
 	featuredplaylist
 	playarrow
 	stop
+	add
+	edit
+	addcircle
+	send
+	deleteforever
 	
 	person
 	tv
@@ -60,11 +69,16 @@ include
 	webapp
 	webapp.3inch
 	webapp.13inch
+	cli
+	weld
+	files
+	offline
 	list
 	backstack
 	preferences
 	activity
 	view
+//	profile.stablepropic
 	time
 	settings
 	translate

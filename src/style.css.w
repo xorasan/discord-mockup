@@ -107,6 +107,9 @@
 .profile_controls
 	margin-right		8px
 
+.persistent_profiles [data-selected]
+	background-color	@secondary
+
 .control
 	height				64px
 .control .icon
@@ -168,4 +171,22 @@
 	padding				24px
 .directmsg .text
 	justify-content		center
+
+.text_input_bar
+	bottom				0
+	left				380px
+	right				0
+	min-height			40px
+	z-index				200
+//	padding				24px 14px
+	background-color	@tertiaryt
+	border-radius		10px
+	margin				20px
+.text_input
+	min-height			40px
+.text_input_bar .icon
+	padding				15px
+
+
+
 

@@ -12,6 +12,21 @@ body
 				[id=profile_list] .profile_list .absolute .left .bottom .top
 				[id=profile_controls] .profile_controls .absolute .right .bottom .top
 		[id=conversation] .conversation .fixed
+		.text_input_bar .flex .fixed
+			[id=attachment] .icon [icon=iconaddcircle]
+			.flex .vertical .grow
+				[id=selected_profile_name] .dim .bold
+				textarea [id=text_input] .text_input
+			[id=send] .icon [icon=iconsend]
+
+	[view=persistent_profiles]
+		[id=list] .persistent_profiles
+
+	[sheet=persistent_profile] .pad
+		input [id=uid] @hidden
+		input [id=name] @placeholder(Name)
+		input [id=displayname] @placeholder(Display Name)
+		textarea [id=bio] @placeholder(Bio)
 
 	[template=control] .control .relative .inlineflex
 		[id=icon] .icon

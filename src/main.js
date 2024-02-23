@@ -2,7 +2,7 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 ;(function(){
 	'use strict';
 
-	var counter_interval = [], is_running;
+	var counter_interval = [], is_running, profile_selection_list, selected_profile;
 
 	main = {
 		start: function () {
@@ -29,7 +29,7 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			});
 		}
 	};
-
+	
 	var profile_colors = {
 		// autogen'd colors by name
 	};
@@ -67,8 +67,39 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 	Hooks.set('ready', function () {
 		Webapp.header();
 		Webapp.status_bar_padding();
+		Softkeys.hide_shadow();
+		Softkeys.hide_dots();
 		
 		var keys = View.dom_keys('main');
+		
+		keys.attachment.onclick = function (e) {
+			open_list_sheet('Select Profile', function (l) {
+				profile_selection_list = l;
+				
+				l.on_selection = function (o) {
+					selected_profile = persistent_profiles.get(o.uid);
+					innertext(keys.selected_profile_name, selected_profile.name);
+					Sheet.cancel();
+				};
+				
+				persistent_profiles.populate( profile_selection_list );
+			});
+		};
+		listener(keys.text_input, 'keyup', function (e) {
+			if (!e.shiftKey && e.key == 'Enter') {
+				var name;
+				if (selected_profile) {
+					name = selected_profile.name
+				}
+				
+				convo_list.set({
+					name,
+					text: keys.text_input.value,
+				});
+				keys.text_input.value = '';
+			}
+		});
+		
 		profile_list = List(keys.profile_list).idprefix('profile').listitem('control').prevent_focus(1);
 		[
 			{ icon: 'iconperson' },
@@ -196,6 +227,16 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 				update_softkeys();
 			}
 		});
+		Softkeys.add({ n: 'Persistent Profiles',
+			k: 'y',
+			alt: 1,
+			ctrl: 1,
+			i: 'iconperson',
+			cb: function () {
+				Hooks.run('view', 'persistent_profiles');
+			}
+		});
+		Softkeys.remove(K.sr);
 	}
 	Hooks.set('viewready', function (arg_one) {
 		if (View.is_active('main')) {
