@@ -1432,15 +1432,11 @@ html, body, svg text {
 	left:380px;
 	top:0;
 	bottom:0;
-	width:calc(100vw - 380px);
-}
-	
-.profile_list {
-	margin-left:8px;
+	width:calc(100vw - 388px);
 }
 	
 .profile_controls {
-	margin-right:8px;
+	margin-right:3px;
 }
 	
 .control {
@@ -1449,6 +1445,8 @@ html, body, svg text {
 	
 .control .icon {
 	margin:auto 0;
+	border-radius:8px;
+	padding:5px;
 }
 	
 .control .icon svg {
@@ -1486,6 +1484,10 @@ html, body, svg text {
 	padding:10px;
 }
 	
+.msg .msgbox {
+	border-radius:8px;
+}
+	
 .directmsg .icon, .msg .icon {
 	background-position:50% 50%;
 	background-size:cover;
@@ -1498,6 +1500,21 @@ html, body, svg text {
 	justify-content:center;
 }
 	
+.profile_list .msgbox {
+	padding:5px;
+	margin:5px 2px;
+}
+	
+.profile_list .msg {
+	padding:0;
+	margin:0 0 0 2px;
+}
+	
+.profile_list .icon {
+	padding:22px;
+	margin:0 10px 0 0;
+}
+	
 .text_input_bar {
 	bottom:0;
 	left:380px;
@@ -1506,10 +1523,13 @@ html, body, svg text {
 	z-index:200;
 	border-radius:10px;
 	margin:20px;
+	overflow:hidden;
 }
 	
 .text_input {
-	min-height:40px;
+	padding:12px 0;
+	border:0;
+	height:55px;
 }
 	
 .text_input_bar .icon {
@@ -1743,16 +1763,12 @@ html, body, svg text {
 					</div>
 				</div>
 			
-			<div class="conversation fixed" data-id=conversation></div>
+			<div class="conversation absolute" data-id=conversation></div>
 			
 			<div class="text_input_bar flex fixed">
 				<div class=icon data-id=attachment data-icon=iconaddcircle></div>
 				
-				<div class="flex vertical grow">
-					<div class="dim bold" data-id=selected_profile_name></div>
-					
-					<textarea class=text_input data-id=text_input></textarea>
-					</div>
+				<textarea class=text_input placeholder=Message... data-id=text_input></textarea>
 				
 				<div class=icon data-id=send data-icon=iconsend></div>
 				</div>
@@ -1804,10 +1820,10 @@ html, body, svg text {
 			</div>
 		
 		<div class="msg relative" data-template=msg>
-			<div class=flex>
+			<div class="flex msgbox">
 				<div class=icon data-id=icon></div>
 				
-				<div class="flex vertical">
+				<div class="flex vertical vcenter">
 					<div class="flex name_time">
 						<div class="name bold" data-id=name></div>
 						

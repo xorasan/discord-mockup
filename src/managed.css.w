@@ -7,7 +7,6 @@
 +include linked/cli.css.w
 +include linked/weld.css.w
 +include linked/files.css.w
-+include linked/offline.css.w
 +include linked/list.css.w
 +include linked/backstack.css.w
 +include linked/preferences.css.w

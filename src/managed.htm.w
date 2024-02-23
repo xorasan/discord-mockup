@@ -7,7 +7,6 @@
 +include linked/cli.htm.w
 +include linked/weld.htm.w
 +include linked/files.htm.w
-+include linked/offline.htm.w
 +include linked/list.htm.w
 +include linked/backstack.htm.w
 +include linked/preferences.htm.w

@@ -7,7 +7,6 @@
 +include linked/cli.js
 +include linked/weld.js
 +include linked/files.js
-+include linked/offline.js
 +include linked/list.js
 +include linked/backstack.js
 +include linked/preferences.js

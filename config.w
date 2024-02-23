@@ -8,7 +8,6 @@ src
 	files
 	cli
 	weld
-	offline
 	softkeys
 	themes
 	sheet
@@ -72,7 +71,6 @@ include
 	cli
 	weld
 	files
-	offline
 	list
 	backstack
 	preferences

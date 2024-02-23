@@ -11,12 +11,10 @@ body
 			[id=profile] .profile .absolute .flex
 				[id=profile_list] .profile_list .absolute .left .bottom .top
 				[id=profile_controls] .profile_controls .absolute .right .bottom .top
-		[id=conversation] .conversation .fixed
+		[id=conversation] .conversation .absolute
 		.text_input_bar .flex .fixed
 			[id=attachment] .icon [icon=iconaddcircle]
-			.flex .vertical .grow
-				[id=selected_profile_name] .dim .bold
-				textarea [id=text_input] .text_input
+			textarea [id=text_input] .text_input @placeholder(Message...)
 			[id=send] .icon [icon=iconsend]
 
 	[view=persistent_profiles]
@@ -49,9 +47,9 @@ body
 		[id=count] .count .absolute .centertext .pad .bold .small @hidden
 
 	[template=msg] .msg .relative
-		.flex
+		.flex .msgbox
 			[id=icon] .icon
-			.flex .vertical
+			.flex .vertical .vcenter
 				.flex .name_time
 					[id=name] .name .bold
 					[id=time] .time .dim .gap

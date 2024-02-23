@@ -3,7 +3,7 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 ;(function(){
 	'use strict';
 
-	var ppuid = 1;
+	var ppuid = 1, module_name = 'persistent_profiles';
 
 	persistent_profiles = {
 		get: function (uid) {
@@ -62,7 +62,10 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 			Files.set.file('pub/profiles.w', Weld.encode_config( persistent_profiles_data ));
 		},
 		load: function () {
-			var text = Files.get.file('pub/profiles.w').toString();
+			var text = '';
+			try {
+				text = Files.get.file('pub/profiles.w').toString();
+			} catch (e) {}
 			persistent_profiles_data = Weld.decode_config( text );
 			for (var i in persistent_profiles_data) {
 				var o = persistent_profiles_data[i];
@@ -81,7 +84,7 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 	};
 
 	Hooks.set('ready', function () {
-		var keys = View.dom_keys('persistent_profiles');
+		var keys = View.dom_keys(module_name);
 		persistent_profiles_list = List(keys.list).idprefix('perspro').listitem('msg');
 		
 		persistent_profiles.load();
@@ -140,7 +143,7 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 	} });
 
 	Hooks.set('viewready', function (arg_one) {
-		if (View.is_active('persistent_profiles')) {
+		if (View.is_active(module_name)) {
 			Webapp.header(['Persistent Profiles', 0, 'iconperson']);
 			update_softkeys();
 		}

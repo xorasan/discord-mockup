@@ -99,13 +99,13 @@
 	left			380px
 	top				0
 	bottom			0
-	width			calc(100vw - 380px)
+	width			calc(100vw - 388px)
+
+body
 	background		@tertiary
 
-.profile_list
-	margin-left			8px
 .profile_controls
-	margin-right		8px
+	margin-right		3px
 
 .persistent_profiles [data-selected]
 	background-color	@secondary
@@ -114,9 +114,13 @@
 	height				64px
 .control .icon
 	margin				auto 0
+	border-radius		8px
+	padding				5px
 .control .icon svg
 	width				32px
 	height				32px
+.control:hover .icon
+	background-color	@secondaryl
 
 .directmsg
 	width				100%
@@ -160,6 +164,10 @@
 .msg
 	padding				10px
 .msg .name_time
+.msg .shadow
+	background-color	@status
+.msg .msgbox
+	border-radius		8px
 .msg .text
 .directmsg .icon, .msg .icon
 	box-shadow			0 0 3px 0 @primary
@@ -171,6 +179,17 @@
 	padding				24px
 .directmsg .text
 	justify-content		center
+.profile_list .msg:hover .msgbox
+	background-color	@secondaryl
+.profile_list .msgbox
+	padding				5px
+	margin				5px 2px
+.profile_list .msg
+	padding				0
+	margin				0 0 0 2px
+.profile_list .icon
+	padding				22px
+	margin				0 10px 0 0
 
 .text_input_bar
 	bottom				0
@@ -182,10 +201,18 @@
 	background-color	@tertiaryt
 	border-radius		10px
 	margin				20px
+	box-shadow			0 0 5px -1px @primary
+	overflow			hidden
 .text_input
-	min-height			40px
+	padding				12px 0
+	border				0
+	height				55px
 .text_input_bar .icon
 	padding				15px
+.text_input_bar .icon:hover
+	background-color	@tertiaryl
+.text_input_bar .icon:active
+	background-color	@tertiaryd
 
 
 

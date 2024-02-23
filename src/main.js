@@ -2,9 +2,30 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 ;(function(){
 	'use strict';
 
-	var counter_interval = [], is_running, profile_selection_list, selected_profile;
+	var counter_interval = [], is_running, profile_selection_list, selected_profile, main_keys;
 
 	main = {
+		select_profile: function (uid) { if (uid) {
+			var o = selected_profile = persistent_profiles.get(uid);
+			profile_list.set({
+				uid: 1, icon: o.icon, name: o.displayname, text: o.name ? '@'+o.name : '',
+				username: o.name,
+			});
+			Preferences.set('selected_profile', uid);
+		} },
+		send: function () {
+			var name, text = main_keys.text_input.value.trim();
+			if (selected_profile) {
+				name = selected_profile.name
+
+				if (text.length) {
+					convo_list.set({ name, text });
+					main_keys.text_input.value = '';
+				}
+			} else {
+				Webapp.status('Select a profile first!');
+			}
+		},
 		start: function () {
 			this.stop();
 			is_running = 1;
@@ -33,16 +54,16 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 	var profile_colors = {
 		// autogen'd colors by name
 	};
-	function set_profile_picture(o, c, k) {
-		if (o.image)
-			setcss(k.icon, 'background-image', 'url('+o.image+')');
+	function set_profile_picture(icon, name, image) {
+		if (image)
+			setcss(icon, 'background-image', 'url('+image+')');
 
-		if ( o.name ) {
-			if (!getcss(k.icon, 'background-image')) {
-				var random_color = profile_colors[o.name] = profile_colors[o.name] || generate_hex_code();
-				setcss(k.icon, 'background-image', 'url(./propics/0.png)');
-				setcss(k.icon, 'background-color', random_color);
-			}
+		if ( name ) {
+//			if (!getcss(k.icon, 'background-image')) {
+				var random_color = Themes.darken_hex_color( Themes.generate_predictable_color( name ), 150, .7 );
+				setcss(icon, 'background-image', 'url(./propics/0.png)');
+				setcss(icon, 'background-color', random_color);
+//			}
 		}
 	}
 	function generate_random_text(limit) {
@@ -57,55 +78,31 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 		
 		return text.join(' ');
 	}
-	function generate_hex_code() {
-		let randomHexCode = "#" 
-		while( randomHexCode.length < 7 ) { 
-			randomHexCode += (Math.floor(Math.random() * 15).toString(16) )
-		}
-		return randomHexCode;
-	}
 	Hooks.set('ready', function () {
 		Webapp.header();
 		Webapp.status_bar_padding();
-		Softkeys.hide_shadow();
+		Softkeys.shadow();
 		Softkeys.hide_dots();
 		
-		var keys = View.dom_keys('main');
+		var keys = main_keys = View.dom_keys('main');
 		
-		keys.attachment.onclick = function (e) {
+		profile_list = List(keys.profile_list).idprefix('profile').listitem('msg').prevent_focus(1);
+		profile_list.set({ uid: 1 });
+		profile_list.on_selection = function () {
 			open_list_sheet('Select Profile', function (l) {
 				profile_selection_list = l;
 				
 				l.on_selection = function (o) {
-					selected_profile = persistent_profiles.get(o.uid);
-					innertext(keys.selected_profile_name, selected_profile.name);
+					main.select_profile( o.uid );
 					Sheet.cancel();
 				};
 				
 				persistent_profiles.populate( profile_selection_list );
 			});
 		};
-		listener(keys.text_input, 'keyup', function (e) {
-			if (!e.shiftKey && e.key == 'Enter') {
-				var name;
-				if (selected_profile) {
-					name = selected_profile.name
-				}
-				
-				convo_list.set({
-					name,
-					text: keys.text_input.value,
-				});
-				keys.text_input.value = '';
-			}
-		});
-		
-		profile_list = List(keys.profile_list).idprefix('profile').listitem('control').prevent_focus(1);
-		[
-			{ icon: 'iconperson' },
-		].forEach(function (o, i) {
-			profile_list.set({ icon: o.icon });
-		});
+		profile_list.after_set = function (o, c, k) {
+			set_profile_picture(k.icon, o.username, o.image);
+		};
 
 		profile_controls = List(keys.profile_controls).idprefix('control').listitem('control')
 							.prevent_focus(1);
@@ -121,7 +118,7 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 		directmsgs_list = List(keys.directmsgs).idprefix('directmsg').listitem('directmsg').prevent_focus(1);
 		directmsgs_list.title('DIRECT MESSAGES');
 		directmsgs_list.after_set = function (o, c, k) {
-			set_profile_picture(o, c, k);
+			set_profile_picture(k.icon, o.name, o.image);
 
 			if (o.count === 0)
 				k.count.hidden = !o.count;
@@ -144,9 +141,6 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			{	image: '1.JPG'	, name: 'Path_X_finder'	, count: 3	, subtitle: 'thanks…'											},
 			{	image: '2.JPG'	, name: 'iamcool'		, state: 1	, subtitle: 'well, so where are we going with our lives…'		},
 			{	image: '3.JPG'	, name: 'serpeuf'					, subtitle: 'DUDE!!! you are so late 💀😟'						},
-			{		},
-			{		},
-			{		},
 		].forEach(function (o, i) {
 			var image;
 			if (o.image)
@@ -192,7 +186,7 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 
 		convo_list = List(keys.conversation).idprefix('convo').listitem('msg').prevent_focus(1);
 		convo_list.after_set = function (o, c, k) {
-			set_profile_picture(o, c, k);
+			set_profile_picture(k.icon, o.name, o.image);
 		};
 
 		[
@@ -214,6 +208,19 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			});
 		});
 		convo_list.select(0);
+
+		keys.send.onclick = function () {
+			main.send();
+		};
+		listener(keys.text_input, 'keydown', function (e) {
+			if (!e.shiftKey && e.key == 'Enter') {
+				main.send();
+				preventdefault(e);
+			}
+		});
+		keys.text_input.focus();
+		
+		main.select_profile( Preferences.get('selected_profile') );
 	});
 	
 	function update_softkeys() {
