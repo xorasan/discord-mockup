@@ -25,6 +25,7 @@ body
 		input [id=name] @placeholder(Name)
 		input [id=displayname] @placeholder(Display Name)
 		textarea [id=bio] @placeholder(Bio)
+		input [id=image] @placeholder(Profile Picture Path)
 
 	[template=control] .control .relative .inlineflex
 		[id=icon] .icon

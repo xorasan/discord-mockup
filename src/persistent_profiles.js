@@ -1,5 +1,17 @@
 // TODO stable pro pic import from dewaan
 var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
+function set_profile_picture(icon, name, image) {
+	if (image)
+		setcss(icon, 'background-image', 'url('+image+')');
+	else
+	if ( name ) {
+//		if (!getcss(k.icon, 'background-image')) {
+			var random_color = Themes.darken_hex_color( Themes.generate_predictable_color( name ), 150, .7 );
+			setcss(icon, 'background-image', 'url(./propics/0.png)');
+			setcss(icon, 'background-color', random_color);
+//		}
+	}
+}
 ;(function(){
 	'use strict';
 
@@ -7,7 +19,7 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 
 	persistent_profiles = {
 		get: function (uid) {
-			var o = persistent_profiles_data[uid];
+			var o = persistent_profiles_data[uid] || {};
 			o.uid = uid;
 			return o;
 		},
@@ -21,6 +33,7 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 				uid: uid,
 				name: o.displayname || '@'+o.name,
 				text: o.bio,
+				image: o.image,
 			});
 			
 			persistent_profiles.save();
@@ -75,7 +88,8 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 				persistent_profiles_list.set({
 					uid: i,
 					name: o.displayname || '@'+o.name,
-					text: o.bio,
+					text: o.bio || '',
+					image: o.image || '',
 				});
 				
 			}
@@ -87,6 +101,9 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 		var keys = View.dom_keys(module_name);
 		persistent_profiles_list = List(keys.list).idprefix('perspro').listitem('msg');
 		
+		persistent_profiles_list.after_set = function (o, c, k) {
+			set_profile_picture( k.icon, o.name, (o.image ? 'propics/'+o.image : '') );
+		};
 		persistent_profiles.load();
 	});
 	
@@ -127,9 +144,10 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 		var o = persistent_profiles_data[ args.uid ];
 		if (o) {
 			k.uid.value = args.uid;
-			k.name.value = o.name;
-			k.displayname.value = o.displayname;
-			k.bio.value = o.bio;
+			k.name.value = o.name || '';
+			k.displayname.value = o.displayname || '';
+			k.bio.value = o.bio || '';
+			k.image.value = o.image || '';
 		}
 	} });
 	Hooks.set('sheet-okay', function (args, k) { if (args.name == 'persistent_profile') {
@@ -138,6 +156,7 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 			name: pers_prof_keys.name.value,
 			displayname: pers_prof_keys.displayname.value,
 			bio: pers_prof_keys.bio.value,
+			image: pers_prof_keys.image.value || '',
 		});
 		pers_prof_keys = 0;
 	} });

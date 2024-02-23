@@ -4157,21 +4157,21 @@ var Preferences, preferences;
 		},
 	};
 	var buildnum = preferences.get('#', 1);
-	if ( buildnum != 461 ) {
+	if ( buildnum != 488 ) {
 		preferences.pop(3); // ruid
 		preferences.pop('@'); // last sync time
 		preferences.pop(4); // list view cache
 		preferences.pop(6); // initial sync done
 	}
-	preferences.set('#', 461);
+	preferences.set('#', 488);
 	Hooks.set('ready', function () {
-		if ( buildnum != 461 ) {
+		if ( buildnum != 488 ) {
 			$.taxeer('seeghahjadeedah', function () {
 				Hooks.run('seeghahjadeedah', buildnum);
 			}, 2000);
 		}
 	});
-	$.log.s( 461 );
+	$.log.s( 488 );
 })();
 var activity;
 ;(function(){
@@ -4710,7 +4710,7 @@ var Settings, settings, currentad;
 		open('https://github.com/xorasan/mudeer', '_blank');
 	}, 'iconmudeer']);
 	if (Config.repo) {
-		add([Config.appname+' '+461, function () {
+		add([Config.appname+' '+488, function () {
 			return Config.sub;
 		}, function () {
 			open(Config.repo, '_blank');
@@ -6780,12 +6780,22 @@ var Dialog, dialog;
 	});*/
 })();
 var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
+function set_profile_picture(icon, name, image) {
+	if (image)
+		setcss(icon, 'background-image', 'url('+image+')');
+	else
+	if ( name ) {
+			var random_color = Themes.darken_hex_color( Themes.generate_predictable_color( name ), 150, .7 );
+			setcss(icon, 'background-image', 'url(./propics/0.png)');
+			setcss(icon, 'background-color', random_color);
+	}
+}
 ;(function(){
 	'use strict';
 	var ppuid = 1, module_name = 'persistent_profiles';
 	persistent_profiles = {
 		get: function (uid) {
-			var o = persistent_profiles_data[uid];
+			var o = persistent_profiles_data[uid] || {};
 			o.uid = uid;
 			return o;
 		},
@@ -6797,6 +6807,7 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 				uid: uid,
 				name: o.displayname || '@'+o.name,
 				text: o.bio,
+				image: o.image,
 			});
 			persistent_profiles.save();
 		},
@@ -6844,7 +6855,8 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 				persistent_profiles_list.set({
 					uid: i,
 					name: o.displayname || '@'+o.name,
-					text: o.bio,
+					text: o.bio || '',
+					image: o.image || '',
 				});
 			}
 			$.log( 'pp uid is', ppuid );
@@ -6853,6 +6865,9 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 	Hooks.set('ready', function () {
 		var keys = View.dom_keys(module_name);
 		persistent_profiles_list = List(keys.list).idprefix('perspro').listitem('msg');
+		persistent_profiles_list.after_set = function (o, c, k) {
+			set_profile_picture( k.icon, o.name, (o.image ? 'propics/'+o.image : '') );
+		};
 		persistent_profiles.load();
 	});
 	function update_softkeys() {
@@ -6891,9 +6906,10 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 		var o = persistent_profiles_data[ args.uid ];
 		if (o) {
 			k.uid.value = args.uid;
-			k.name.value = o.name;
-			k.displayname.value = o.displayname;
-			k.bio.value = o.bio;
+			k.name.value = o.name || '';
+			k.displayname.value = o.displayname || '';
+			k.bio.value = o.bio || '';
+			k.image.value = o.image || '';
 		}
 	} });
 	Hooks.set('sheet-okay', function (args, k) { if (args.name == 'persistent_profile') {
@@ -6902,6 +6918,7 @@ var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
 			name: pers_prof_keys.name.value,
 			displayname: pers_prof_keys.displayname.value,
 			bio: pers_prof_keys.bio.value,
+			image: pers_prof_keys.image.value || '',
 		});
 		pers_prof_keys = 0;
 	} });
@@ -6918,20 +6935,28 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 	var counter_interval = [], is_running, profile_selection_list, selected_profile, main_keys;
 	main = {
 		select_profile: function (uid) { if (uid) {
-			var o = selected_profile = persistent_profiles.get(uid);
-			profile_list.set({
-				uid: 1, icon: o.icon, name: o.displayname, text: o.name ? '@'+o.name : '',
-				username: o.name,
-			});
-			Preferences.set('selected_profile', uid);
+			var o = persistent_profiles.get(uid);
+			if (o) {
+				selected_profile = o;
+				profile_list.set({
+					uid: 1, icon: o.icon, name: o.displayname, text: o.name ? '@'+o.name : '',
+					username: o.name,
+					profile: o,
+				});
+				Preferences.set('selected_profile', uid);
+			}
 		} },
 		send: function () {
 			var name, text = main_keys.text_input.value.trim();
 			if (selected_profile) {
-				name = selected_profile.name
+				name = selected_profile.displayname || '@'+selected_profile.name;
 				if (text.length) {
-					convo_list.set({ name, text });
+					convo_list.set({ name, profile: selected_profile, text });
 					main_keys.text_input.value = '';
+					var last_element = convo_list.get_item_element( convo_list.length()-1 );
+					if (last_element) {
+						scroll_into_view_with_padding( last_element, [Webapp.get_tall_screen_height(), 0, 200, 0] );
+					}
 				}
 			} else {
 				Webapp.status('Select a profile first!');
@@ -6961,17 +6986,6 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			});
 		}
 	};
-	var profile_colors = {
-	};
-	function set_profile_picture(icon, name, image) {
-		if (image)
-			setcss(icon, 'background-image', 'url('+image+')');
-		if ( name ) {
-				var random_color = Themes.darken_hex_color( Themes.generate_predictable_color( name ), 150, .7 );
-				setcss(icon, 'background-image', 'url(./propics/0.png)');
-				setcss(icon, 'background-color', random_color);
-		}
-	}
 	function generate_random_text(limit) {
 		var words = ['origami', 'pink', 'flower', 'pot', 'seed', 'wojak', 'girl',
 			'boy', 'man', 'woman', 'walnut', 'black', 'sin', 'pure', 'joy', 'angry'], text = [];
@@ -6984,6 +6998,7 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 	Hooks.set('ready', function () {
 		Webapp.header();
 		Webapp.status_bar_padding();
+		Webapp.add_minimal_view('main');
 		Softkeys.shadow();
 		Softkeys.hide_dots();
 		var keys = main_keys = View.dom_keys('main');
@@ -7000,7 +7015,13 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			});
 		};
 		profile_list.after_set = function (o, c, k) {
-			set_profile_picture(k.icon, o.username, o.image);
+			var name, image;
+			if (o.profile) {
+				name = o.profile.name;
+				if (o.profile.image)
+					image = 'propics/'+o.profile.image;
+			}
+			set_profile_picture(k.icon, name, image);
 		};
 		profile_controls = List(keys.profile_controls).idprefix('control').listitem('control')
 							.prevent_focus(1);
@@ -7074,14 +7095,15 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 		servers_list.select(0);
 		convo_list = List(keys.conversation).idprefix('convo').listitem('msg').prevent_focus(1);
 		convo_list.after_set = function (o, c, k) {
-			set_profile_picture(k.icon, o.name, o.image);
+			var name, image;
+			if (o.profile) {
+				name = o.profile.name;
+				if (o.profile.image)
+					image = 'propics/'+o.profile.image;
+			}
+			set_profile_picture(k.icon, name, image);
 		};
-		[
-			{ image: '3.JPG' , name: 'serpeuf' , subtitle: 'DUDE!!! you are so late 💀😟' },
-			{ name: 'Condoriano' , subtitle: 'overslept… bloody weird dream…' },
-			{ image: '3.JPG' , name: 'serpeuf' , subtitle: 'alright, alright…\nYou joining?' },
-			{ name: 'Condoriano' , subtitle: 'yeah, yeah… fine…' },
-		].forEach(function (o, i) {
+		[].forEach(function (o, i) {
 			var image;
 			if (o.image)
 				image = './propics/'+o.image;

@@ -100,6 +100,8 @@
 	top				0
 	bottom			0
 	width			calc(100vw - 388px)
+.conversation .list
+	padding-bottom	110px
 
 body
 	background		@tertiary

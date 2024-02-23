@@ -6,21 +6,29 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 
 	main = {
 		select_profile: function (uid) { if (uid) {
-			var o = selected_profile = persistent_profiles.get(uid);
-			profile_list.set({
-				uid: 1, icon: o.icon, name: o.displayname, text: o.name ? '@'+o.name : '',
-				username: o.name,
-			});
-			Preferences.set('selected_profile', uid);
+			var o = persistent_profiles.get(uid);
+			if (o) {
+				selected_profile = o;
+				profile_list.set({
+					uid: 1, icon: o.icon, name: o.displayname, text: o.name ? '@'+o.name : '',
+					username: o.name,
+					profile: o,
+				});
+				Preferences.set('selected_profile', uid);
+			}
 		} },
 		send: function () {
 			var name, text = main_keys.text_input.value.trim();
 			if (selected_profile) {
-				name = selected_profile.name
+				name = selected_profile.displayname || '@'+selected_profile.name;
 
 				if (text.length) {
-					convo_list.set({ name, text });
+					convo_list.set({ name, profile: selected_profile, text });
 					main_keys.text_input.value = '';
+					var last_element = convo_list.get_item_element( convo_list.length()-1 );
+					if (last_element) {
+						scroll_into_view_with_padding( last_element, [Webapp.get_tall_screen_height(), 0, 200, 0] );
+					}
 				}
 			} else {
 				Webapp.status('Select a profile first!');
@@ -51,21 +59,6 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 		}
 	};
 	
-	var profile_colors = {
-		// autogen'd colors by name
-	};
-	function set_profile_picture(icon, name, image) {
-		if (image)
-			setcss(icon, 'background-image', 'url('+image+')');
-
-		if ( name ) {
-//			if (!getcss(k.icon, 'background-image')) {
-				var random_color = Themes.darken_hex_color( Themes.generate_predictable_color( name ), 150, .7 );
-				setcss(icon, 'background-image', 'url(./propics/0.png)');
-				setcss(icon, 'background-color', random_color);
-//			}
-		}
-	}
 	function generate_random_text(limit) {
 		var words = ['origami', 'pink', 'flower', 'pot', 'seed', 'wojak', 'girl',
 			'boy', 'man', 'woman', 'walnut', 'black', 'sin', 'pure', 'joy', 'angry'], text = [];
@@ -81,6 +74,7 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 	Hooks.set('ready', function () {
 		Webapp.header();
 		Webapp.status_bar_padding();
+		Webapp.add_minimal_view('main');
 		Softkeys.shadow();
 		Softkeys.hide_dots();
 		
@@ -101,7 +95,14 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			});
 		};
 		profile_list.after_set = function (o, c, k) {
-			set_profile_picture(k.icon, o.username, o.image);
+			var name, image;
+			if (o.profile) {
+				name = o.profile.name;
+				if (o.profile.image)
+					image = 'propics/'+o.profile.image;
+			}
+
+			set_profile_picture(k.icon, name, image);
 		};
 
 		profile_controls = List(keys.profile_controls).idprefix('control').listitem('control')
@@ -186,15 +187,16 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 
 		convo_list = List(keys.conversation).idprefix('convo').listitem('msg').prevent_focus(1);
 		convo_list.after_set = function (o, c, k) {
-			set_profile_picture(k.icon, o.name, o.image);
+			var name, image;
+			if (o.profile) {
+				name = o.profile.name;
+				if (o.profile.image)
+					image = 'propics/'+o.profile.image;
+			}
+			set_profile_picture(k.icon, name, image);
 		};
 
-		[
-			{	image: '3.JPG'	, name: 'serpeuf'					, subtitle: 'DUDE!!! you are so late 💀😟'						},
-			{					  name: 'Condoriano'				, subtitle: 'overslept… bloody weird dream…'					},
-			{	image: '3.JPG'	, name: 'serpeuf'					, subtitle: 'alright, alright…\nYou joining?'					},
-			{					  name: 'Condoriano'				, subtitle: 'yeah, yeah… fine…'									},
-		].forEach(function (o, i) {
+		[].forEach(function (o, i) {
 			var image;
 			if (o.image)
 				image = './propics/'+o.image;
