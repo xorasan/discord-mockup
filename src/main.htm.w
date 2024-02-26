@@ -16,6 +16,21 @@ body
 			[id=attachment] .icon [icon=iconaddcircle]
 			textarea [id=text_input] .text_input @placeholder(Message...)
 			[id=send] .icon [icon=iconsend]
+		[id=profile_popup] .profile_popup .fixed @hidden
+			[id=header] .header
+			[id=icon] .icon .absolute
+			[id=state_circle] .state_circle .absolute
+			.flex .vertical .darker
+				[id=displayname] .displayname .big .bold
+				[id=name] .name
+				[id=pronouns] .pronouns
+				hr
+				.gapv .bold .upper 'about me'
+				[id=bio] .gapv .bio
+				.gapv .bold .upper 'discord member since'
+				hr
+				'Online' .gapv
+		[id=close_popup] .close_popup .fixed @hidden
 
 	[view=persistent_profiles]
 		[id=list] .persistent_profiles
@@ -26,6 +41,12 @@ body
 		input [id=displayname] @placeholder(Display Name)
 		textarea [id=bio] @placeholder(Bio)
 		input [id=image] @placeholder(Profile Picture Path)
+		label 'State'
+		[id=states] .gapv
+
+	[template=state] .pers_state .relative .inlineflex .pad .padv .tag
+		[id=color] .color
+		[id=name] .name
 
 	[template=control] .control .relative .inlineflex
 		[id=icon] .icon

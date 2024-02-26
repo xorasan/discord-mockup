@@ -1,5 +1,5 @@
 // TODO stable pro pic import from dewaan
-var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
+var persistent_profiles, persistent_profiles_list, persistent_profiles_data = {};
 function set_profile_picture(icon, name, image) {
 	if (image)
 		setcss(icon, 'background-image', 'url('+image+')');
@@ -34,6 +34,15 @@ function set_profile_picture(icon, name, image) {
 				name: o.displayname || '@'+o.name,
 				text: o.bio,
 				image: o.image,
+				state: o.state,
+			});
+
+			Hooks.run('profile-set', {
+				uid: uid,
+				name: o.displayname || '@'+o.name,
+				text: o.bio || '',
+				image: o.image || '',
+				state: o.state || '',
 			});
 			
 			persistent_profiles.save();
@@ -90,9 +99,20 @@ function set_profile_picture(icon, name, image) {
 					name: o.displayname || '@'+o.name,
 					text: o.bio || '',
 					image: o.image || '',
+					state: o.state || '',
+				});
+				
+				Hooks.run('profile-set', {
+					uid: i,
+					name: o.displayname || '@'+o.name,
+					text: o.bio || '',
+					image: o.image || '',
+					state: o.state || '',
 				});
 				
 			}
+			
+			Hooks.run('profiles-loaded');
 			$.log( 'pp uid is', ppuid );
 		},
 	};
@@ -104,7 +124,10 @@ function set_profile_picture(icon, name, image) {
 		persistent_profiles_list.after_set = function (o, c, k) {
 			set_profile_picture( k.icon, o.name, (o.image ? 'propics/'+o.image : '') );
 		};
-		persistent_profiles.load();
+		
+		$.taxeer('load-'+module_name, function () {
+			persistent_profiles.load();
+		});
 	});
 	
 	function update_softkeys() {
@@ -136,13 +159,27 @@ function set_profile_picture(icon, name, image) {
 		});
 	}
 
-	var pers_prof_keys;
+	var pers_prof_keys, pers_states;
 	Hooks.set('sheet-ready', async function (args, k) { if (args.name == 'persistent_profile') {
 		Sheet.set_title('Setup Persistent Profile');
 		pers_prof_keys = k;
 		k.name.focus();
 		var o = persistent_profiles_data[ args.uid ];
+
+		pers_states = List(k.states).idprefix('ppstates').freeflow(1).listitem('state');
+		[
+		{ name: 'Online', color: '' },
+		{ name: 'Away', color: '' },
+		{ name: 'Busy', color: '' },
+		{ name: 'Offline', color: '' },
+		].forEach(function ({ color, name }, i) {
+			pers_states.set({ uid: i+1, color, name });
+		});
+
 		if (o) {
+			if (o.state) {
+				pers_states.select_silently( pers_states.id2num( o.state ) );
+			}
 			k.uid.value = args.uid;
 			k.name.value = o.name || '';
 			k.displayname.value = o.displayname || '';
@@ -151,12 +188,17 @@ function set_profile_picture(icon, name, image) {
 		}
 	} });
 	Hooks.set('sheet-okay', function (args, k) { if (args.name == 'persistent_profile') {
+		var state;
+		if (pers_states) {
+			state = getdata( pers_states.get_item_element(), 'uid' );
+		}
 		persistent_profiles.set({
 			uid: pers_prof_keys.uid.value,
 			name: pers_prof_keys.name.value,
 			displayname: pers_prof_keys.displayname.value,
 			bio: pers_prof_keys.bio.value,
 			image: pers_prof_keys.image.value || '',
+			state,
 		});
 		pers_prof_keys = 0;
 	} });

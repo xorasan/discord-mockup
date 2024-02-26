@@ -401,6 +401,14 @@ return 'body {'
 +'\n	background-color:'+o.greenl+';'
 +'\n	border-color:'+o.greend+';'
 +'\n}'
++'\n.directmsg .status[data-state=\'2\'] {'
++'\n	background-color:'+o.yellowl+';'
++'\n	border-color:'+o.yellowd+';'
++'\n}'
++'\n.directmsg .status[data-state=\'3\'] {'
++'\n	background-color:'+o.redl+';'
++'\n	border-color:'+o.redd+';'
++'\n}'
 +'\n.directmsg .count {'
 +'\n	box-shadow:0 0 0 2px '+o.secondaryl+';'
 +'\n	background-color:'+o.red+';'
@@ -424,6 +432,31 @@ return 'body {'
 +'\n}'
 +'\n.text_input_bar .icon:active {'
 +'\n	background-color:'+o.tertiaryd+';'
++'\n}'
++'\n.profile_popup {'
++'\n	background-color:'+o.secondary+';'
++'\n	box-shadow:0 0 30px -10px '+o.primary+';'
++'\n}'
++'\n.profile_popup .state_circle {'
++'\n	background-color:'+o.secondary+';'
++'\n	border:4px solid '+o.tertiary+';'
++'\n	box-shadow:0 0 5px -1px '+o.primary+';'
++'\n}'
++'\n.profile_popup .icon img {'
++'\n	border:6px solid '+o.secondaryd+';'
++'\n	box-shadow:0 0 5px -1px '+o.primary+';'
++'\n}'
++'\n.profile_popup .header {'
++'\n	background-color:'+o.secondaryl+';'
++'\n}'
++'\n.profile_popup .darker {'
++'\n	background-color:'+o.secondaryd+';'
++'\n}'
++'\n.close_popup {'
++'\n	background-color:'+o.status+';'
++'\n}'
++'\n[data-selected].pers_state {'
++'\n	background-color:'+o.secondary+';'
 +'\n}';
 };
 
@@ -4157,21 +4190,21 @@ var Preferences, preferences;
 		},
 	};
 	var buildnum = preferences.get('#', 1);
-	if ( buildnum != 488 ) {
+	if ( buildnum != 553 ) {
 		preferences.pop(3); // ruid
 		preferences.pop('@'); // last sync time
 		preferences.pop(4); // list view cache
 		preferences.pop(6); // initial sync done
 	}
-	preferences.set('#', 488);
+	preferences.set('#', 553);
 	Hooks.set('ready', function () {
-		if ( buildnum != 488 ) {
+		if ( buildnum != 553 ) {
 			$.taxeer('seeghahjadeedah', function () {
 				Hooks.run('seeghahjadeedah', buildnum);
 			}, 2000);
 		}
 	});
-	$.log.s( 488 );
+	$.log.s( 553 );
 })();
 var activity;
 ;(function(){
@@ -4710,7 +4743,7 @@ var Settings, settings, currentad;
 		open('https://github.com/xorasan/mudeer', '_blank');
 	}, 'iconmudeer']);
 	if (Config.repo) {
-		add([Config.appname+' '+488, function () {
+		add([Config.appname+' '+553, function () {
 			return Config.sub;
 		}, function () {
 			open(Config.repo, '_blank');
@@ -5018,7 +5051,7 @@ var Templates, templates, namaavij;
 			}
 			return false;
 		},
-		set: function (clone, o, template) {
+		set: function (clone, o, template) { // template is optional
 			var keys = templates.keys(clone);
 			o = o || {};
 			if (o.hidden) clone.hidden = 1;
@@ -6143,7 +6176,9 @@ var Themes, themes;
 			greend: '#0b0',
 			green: '#0c0',
 			greenl: '#0d0',
+			yellowd: '#b90',
 			yellow: '#ca0',
+			yellowl: '#db0',
 			redl: '#f99',
 			red: '#c00',
 			redd: '#900',
@@ -6180,7 +6215,9 @@ var Themes, themes;
 			greend: '#0b0',
 			green: '#0c0',
 			greenl: '#0d0',
+			yellowd: '#b90',
 			yellow: '#ca0',
+			yellowl: '#db0',
 			redl: '#900',
 			red: '#c00',
 			redd: '#faa',
@@ -6779,7 +6816,7 @@ var Dialog, dialog;
 		}
 	});*/
 })();
-var persistent_profiles, persistent_profiles_list, persistent_profiles_data;
+var persistent_profiles, persistent_profiles_list, persistent_profiles_data = {};
 function set_profile_picture(icon, name, image) {
 	if (image)
 		setcss(icon, 'background-image', 'url('+image+')');
@@ -6808,6 +6845,14 @@ function set_profile_picture(icon, name, image) {
 				name: o.displayname || '@'+o.name,
 				text: o.bio,
 				image: o.image,
+				state: o.state,
+			});
+			Hooks.run('profile-set', {
+				uid: uid,
+				name: o.displayname || '@'+o.name,
+				text: o.bio || '',
+				image: o.image || '',
+				state: o.state || '',
 			});
 			persistent_profiles.save();
 		},
@@ -6857,8 +6902,17 @@ function set_profile_picture(icon, name, image) {
 					name: o.displayname || '@'+o.name,
 					text: o.bio || '',
 					image: o.image || '',
+					state: o.state || '',
+				});
+				Hooks.run('profile-set', {
+					uid: i,
+					name: o.displayname || '@'+o.name,
+					text: o.bio || '',
+					image: o.image || '',
+					state: o.state || '',
 				});
 			}
+			Hooks.run('profiles-loaded');
 			$.log( 'pp uid is', ppuid );
 		},
 	};
@@ -6868,7 +6922,9 @@ function set_profile_picture(icon, name, image) {
 		persistent_profiles_list.after_set = function (o, c, k) {
 			set_profile_picture( k.icon, o.name, (o.image ? 'propics/'+o.image : '') );
 		};
-		persistent_profiles.load();
+		$.taxeer('load-'+module_name, function () {
+			persistent_profiles.load();
+		});
 	});
 	function update_softkeys() {
 		Softkeys.add({ n: 'Add',
@@ -6898,13 +6954,25 @@ function set_profile_picture(icon, name, image) {
 			},
 		});
 	}
-	var pers_prof_keys;
+	var pers_prof_keys, pers_states;
 	Hooks.set('sheet-ready', async function (args, k) { if (args.name == 'persistent_profile') {
 		Sheet.set_title('Setup Persistent Profile');
 		pers_prof_keys = k;
 		k.name.focus();
 		var o = persistent_profiles_data[ args.uid ];
+		pers_states = List(k.states).idprefix('ppstates').freeflow(1).listitem('state');
+		[
+		{ name: 'Online', color: '' },
+		{ name: 'Away', color: '' },
+		{ name: 'Busy', color: '' },
+		{ name: 'Offline', color: '' },
+		].forEach(function ({ color, name }, i) {
+			pers_states.set({ uid: i+1, color, name });
+		});
 		if (o) {
+			if (o.state) {
+				pers_states.select_silently( pers_states.id2num( o.state ) );
+			}
 			k.uid.value = args.uid;
 			k.name.value = o.name || '';
 			k.displayname.value = o.displayname || '';
@@ -6913,12 +6981,17 @@ function set_profile_picture(icon, name, image) {
 		}
 	} });
 	Hooks.set('sheet-okay', function (args, k) { if (args.name == 'persistent_profile') {
+		var state;
+		if (pers_states) {
+			state = getdata( pers_states.get_item_element(), 'uid' );
+		}
 		persistent_profiles.set({
 			uid: pers_prof_keys.uid.value,
 			name: pers_prof_keys.name.value,
 			displayname: pers_prof_keys.displayname.value,
 			bio: pers_prof_keys.bio.value,
 			image: pers_prof_keys.image.value || '',
+			state,
 		});
 		pers_prof_keys = 0;
 	} });
@@ -6934,6 +7007,26 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 	'use strict';
 	var counter_interval = [], is_running, profile_selection_list, selected_profile, main_keys;
 	main = {
+		show_profile: function (o) {
+			izhar(main_keys.profile_popup);
+			izhar(main_keys.close_popup);
+			$.log( o );
+			if (o) {
+				if (o.image) {
+					Templates.set( main_keys.profile_popup, {
+						icon$image: 'propics/'+o.image,
+					}, 0);
+				}
+				innertext(main_keys.displayname, o.displayname);
+				innertext(main_keys.name, '@'+o.name);
+				innertext(main_keys.bio, o.bio);
+				innertext(main_keys.displayname, o.displayname);
+			}
+		},
+		hide_profile: function () {
+			ixtaf(main_keys.profile_popup);
+			ixtaf(main_keys.close_popup);
+		},
 		select_profile: function (uid) { if (uid) {
 			var o = persistent_profiles.get(uid);
 			if (o) {
@@ -7002,17 +7095,13 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 		Softkeys.shadow();
 		Softkeys.hide_dots();
 		var keys = main_keys = View.dom_keys('main');
+		main_keys.close_popup.onclick = function () {
+			main.hide_profile();
+		};
 		profile_list = List(keys.profile_list).idprefix('profile').listitem('msg').prevent_focus(1);
 		profile_list.set({ uid: 1 });
 		profile_list.on_selection = function () {
-			open_list_sheet('Select Profile', function (l) {
-				profile_selection_list = l;
-				l.on_selection = function (o) {
-					main.select_profile( o.uid );
-					Sheet.cancel();
-				};
-				persistent_profiles.populate( profile_selection_list );
-			});
+			main.show_profile( selected_profile );
 		};
 		profile_list.after_set = function (o, c, k) {
 			var name, image;
@@ -7023,15 +7112,24 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			}
 			set_profile_picture(k.icon, name, image);
 		};
-		profile_controls = List(keys.profile_controls).idprefix('control').listitem('control')
-							.prevent_focus(1);
+		profile_controls = List(keys.profile_controls).idprefix('control').listitem('control');
 		[
-			{ icon: 'iconm' },
-			{ icon: 'iconheadset' },
-			{ icon: 'iconsettings' },
+			{ uid: 1, icon: 'iconm' },
+			{ uid: 2, icon: 'iconheadset' },
+			{ uid: 3, icon: 'iconsettings' },
 		].forEach(function (o, i) {
 			profile_controls.set({ icon: o.icon });
 		});
+		profile_controls.on_selection = function (o) { if (o.uid == 2) {
+			open_list_sheet('Select Profile', function (l) {
+				profile_selection_list = l;
+				l.on_selection = function (o) {
+					main.select_profile( o.uid );
+					Sheet.cancel();
+				};
+				persistent_profiles.populate( profile_selection_list );
+			});
+		} };
 		directmsgs_list = List(keys.directmsgs).idprefix('directmsg').listitem('directmsg').prevent_focus(1);
 		directmsgs_list.title('DIRECT MESSAGES');
 		directmsgs_list.after_set = function (o, c, k) {
@@ -7051,23 +7149,19 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 				servers_list.set({ uid: 0, count: total_count });
 			});
 		};
-		[
-			{ image: '1.JPG' , name: 'Path_X_finder' , count: 3 , subtitle: 'thanks…' },
-			{ image: '2.JPG' , name: 'iamcool' , state: 1 , subtitle: 'well, so where are we going with our lives…' },
-			{ image: '3.JPG' , name: 'serpeuf' , subtitle: 'DUDE!!! you are so late 💀😟' },
-		].forEach(function (o, i) {
+		directmsgs_list.select(0);
+		Hooks.set('profile-set', function (o) {
 			var image;
 			if (o.image)
 				image = './propics/'+o.image;
 			directmsgs_list.set({
-				name: o.name || generate_random_text(2),
-				subtitle: o.subtitle,
+				uid: o.uid,
+				name: o.name,
 				image: image,
 				count: o.count,
 				state: o.state,
 			});
 		});
-		directmsgs_list.select(0);
 		servers_list = List(keys.servers).idprefix('server').listitem('server').prevent_focus(1);
 		servers_list.after_set = function (o, c, k) {
 			if (o.image)
@@ -7126,7 +7220,9 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			}
 		});
 		keys.text_input.focus();
-		main.select_profile( Preferences.get('selected_profile') );
+		Hooks.set('profiles-loaded', function (arg_one) {
+			main.select_profile( Preferences.get('selected_profile') );
+		});
 	});
 	function update_softkeys() {
 		Softkeys.add({ n: is_running ? 'Stop' : 'Start',

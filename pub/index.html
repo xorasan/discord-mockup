@@ -1539,6 +1539,54 @@ html, body, svg text {
 .text_input_bar .icon {
 	padding:15px;
 }
+	
+.profile_popup {
+	bottom:80px;
+	left:90px;
+	min-height:80px;
+	width:410px;
+	z-index:210;
+	border-radius:8px;
+	overflow:hidden;
+}
+	
+.profile_popup .icon {
+	top:12px;
+	left:12px;
+}
+	
+.profile_popup .state_circle {
+	top:80px;
+	left:80px;
+	border-radius:100%;
+	width:20px;
+	height:20px;
+}
+	
+.profile_popup .icon img {
+	border-radius:100%;
+	width:92px;
+	height:92px;
+}
+	
+.profile_popup .header {
+	height:60px;
+	width:100%;
+}
+	
+.profile_popup .darker {
+	margin:60px 10px 10px 10px;
+	border-radius:8px;
+	padding:8px;
+}
+	
+.close_popup {
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	z-index:200;
+}
 </style>
 
 		</head>
@@ -1776,6 +1824,34 @@ html, body, svg text {
 				
 				<div class=icon data-id=send data-icon=iconsend></div>
 				</div>
+			
+			<div class="profile_popup fixed" hidden data-id=profile_popup>
+				<div class=header data-id=header></div>
+				
+				<div class="icon absolute" data-id=icon></div>
+				
+				<div class="state_circle absolute" data-id=state_circle></div>
+				
+				<div class="flex vertical darker">
+					<div class="displayname big bold" data-id=displayname></div>
+					
+					<div class=name data-id=name></div>
+					
+					<div class=pronouns data-id=pronouns></div>
+					
+					<hr>
+					<div class="gapv bold upper">about me</div>
+					
+					<div class="gapv bio" data-id=bio></div>
+					
+					<div class="gapv bold upper">discord member since</div>
+					
+					<hr>
+					<div class=gapv>Online</div>
+					</div>
+				</div>
+			
+			<div class="close_popup fixed" hidden data-id=close_popup></div>
 			</div>
 		
 		<div data-view=persistent_profiles>
@@ -1788,7 +1864,17 @@ html, body, svg text {
 			<input placeholder="Display Name" data-id=displayname>
 			<textarea placeholder=Bio data-id=bio></textarea>
 			
-			<input placeholder="Profile Picture Path" data-id=image></div>
+			<input placeholder="Profile Picture Path" data-id=image>
+			<label>State</label>
+			
+			<div class=gapv data-id=states></div>
+			</div>
+		
+		<div class="pers_state relative inlineflex pad padv tag" data-template=state>
+			<div class=color data-id=color></div>
+			
+			<div class=name data-id=name></div>
+			</div>
 		
 		<div class="control relative inlineflex" data-template=control>
 			<div class=icon data-id=icon></div>

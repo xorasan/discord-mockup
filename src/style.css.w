@@ -155,6 +155,12 @@ body
 .directmsg .status[data-state='1']
 	background-color	@greenl
 	border-color		@greend
+.directmsg .status[data-state='2']
+	background-color	@yellowl
+	border-color		@yellowd
+.directmsg .status[data-state='3']
+	background-color	@redl
+	border-color		@redd
 .directmsg .count
 	right				10px
 	box-shadow			0 0 0 2px @secondaryl
@@ -216,6 +222,51 @@ body
 .text_input_bar .icon:active
 	background-color	@tertiaryd
 
+.profile_popup
+	background-color	@secondary
+	box-shadow			0 0 30px -10px @primary
+	bottom				80px
+	left				90px
+	min-height			80px
+	width				410px
+	z-index				210
+	border-radius		8px
+	overflow			hidden
+.profile_popup .icon
+	top					12px
+	left				12px
+.profile_popup .state_circle
+	background-color	@secondary
+	top					80px
+	left				80px
+	border				4px solid @tertiary
+	box-shadow			0 0 5px -1px @primary
+	border-radius		100%
+	width				20px
+	height				20px
+.profile_popup .icon img
+	border				6px solid @secondaryd
+	box-shadow			0 0 5px -1px @primary
+	border-radius		100%
+	width				92px
+	height				92px
+.profile_popup .header
+	background-color	@secondaryl
+	height				60px
+	width				100%
+.profile_popup .darker
+	background-color	@secondaryd
+	margin				60px 10px 10px 10px
+	border-radius		8px
+	padding				8px
+.close_popup
+	top					0
+	bottom				0
+	left				0
+	right				0
+	background-color	@status
+	z-index				200
 
-
+[data-selected].pers_state
+	background-color	@secondary
 

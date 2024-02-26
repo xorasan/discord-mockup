@@ -5,6 +5,26 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 	var counter_interval = [], is_running, profile_selection_list, selected_profile, main_keys;
 
 	main = {
+		show_profile: function (o) {
+			izhar(main_keys.profile_popup);
+			izhar(main_keys.close_popup);
+			$.log( o );
+			if (o) {
+				if (o.image) {
+					Templates.set( main_keys.profile_popup, {
+						icon$image: 'propics/'+o.image,
+					}, 0);
+				}
+				innertext(main_keys.displayname, o.displayname);
+				innertext(main_keys.name, '@'+o.name);
+				innertext(main_keys.bio, o.bio);
+				innertext(main_keys.displayname, o.displayname);
+			}
+		},
+		hide_profile: function () {
+			ixtaf(main_keys.profile_popup);
+			ixtaf(main_keys.close_popup);
+		},
 		select_profile: function (uid) { if (uid) {
 			var o = persistent_profiles.get(uid);
 			if (o) {
@@ -80,19 +100,14 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 		
 		var keys = main_keys = View.dom_keys('main');
 		
+		main_keys.close_popup.onclick = function () {
+			main.hide_profile();
+		};
+		
 		profile_list = List(keys.profile_list).idprefix('profile').listitem('msg').prevent_focus(1);
 		profile_list.set({ uid: 1 });
 		profile_list.on_selection = function () {
-			open_list_sheet('Select Profile', function (l) {
-				profile_selection_list = l;
-				
-				l.on_selection = function (o) {
-					main.select_profile( o.uid );
-					Sheet.cancel();
-				};
-				
-				persistent_profiles.populate( profile_selection_list );
-			});
+			main.show_profile( selected_profile );
 		};
 		profile_list.after_set = function (o, c, k) {
 			var name, image;
@@ -105,16 +120,27 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			set_profile_picture(k.icon, name, image);
 		};
 
-		profile_controls = List(keys.profile_controls).idprefix('control').listitem('control')
-							.prevent_focus(1);
+		profile_controls = List(keys.profile_controls).idprefix('control').listitem('control');
 
 		[
-			{ icon: 'iconm' },
-			{ icon: 'iconheadset' },
-			{ icon: 'iconsettings' },
+			{ uid: 1, icon: 'iconm' },
+			{ uid: 2, icon: 'iconheadset' },
+			{ uid: 3, icon: 'iconsettings' },
 		].forEach(function (o, i) {
 			profile_controls.set({ icon: o.icon });
 		});
+		profile_controls.on_selection = function (o) { if (o.uid == 2) {
+			open_list_sheet('Select Profile', function (l) {
+				profile_selection_list = l;
+				
+				l.on_selection = function (o) {
+					main.select_profile( o.uid );
+					Sheet.cancel();
+				};
+				
+				persistent_profiles.populate( profile_selection_list );
+			});
+		} };
 
 		directmsgs_list = List(keys.directmsgs).idprefix('directmsg').listitem('directmsg').prevent_focus(1);
 		directmsgs_list.title('DIRECT MESSAGES');
@@ -138,23 +164,20 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 				servers_list.set({ uid: 0, count: total_count });
 			});
 		};
-		[
-			{	image: '1.JPG'	, name: 'Path_X_finder'	, count: 3	, subtitle: 'thanks…'											},
-			{	image: '2.JPG'	, name: 'iamcool'		, state: 1	, subtitle: 'well, so where are we going with our lives…'		},
-			{	image: '3.JPG'	, name: 'serpeuf'					, subtitle: 'DUDE!!! you are so late 💀😟'						},
-		].forEach(function (o, i) {
+		directmsgs_list.select(0);
+		Hooks.set('profile-set', function (o) {
 			var image;
 			if (o.image)
 				image = './propics/'+o.image;
 			directmsgs_list.set({
-				name: o.name || generate_random_text(2),
-				subtitle: o.subtitle,
+				uid: o.uid,
+				name: o.name,
+//				subtitle: o.subtitle,
 				image: image,
 				count: o.count,
 				state: o.state,
 			});
 		});
-		directmsgs_list.select(0);
 
 		servers_list = List(keys.servers).idprefix('server').listitem('server').prevent_focus(1);
 		servers_list.after_set = function (o, c, k) {
@@ -221,8 +244,10 @@ var servers_list, directmsgs_list, profile_list, profile_controls, convo_list, m
 			}
 		});
 		keys.text_input.focus();
-		
-		main.select_profile( Preferences.get('selected_profile') );
+
+		Hooks.set('profiles-loaded', function (arg_one) {
+			main.select_profile( Preferences.get('selected_profile') );
+		});
 	});
 	
 	function update_softkeys() {
